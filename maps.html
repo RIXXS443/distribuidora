@@ -1,23 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mapa Básico</title>
-    <style>#map { height: 400px; width: 100%; }</style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8"></script>
+  <meta charset="UTF-8">
+  <title>Ubicación del Usuario</title>
+  <style>
+    #map {
+      height: 400px;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    #info {
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+      color: #333;
+    }
+    body {
+      padding: 20px;
+    }
+  </style>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&libraries=places"></script>
 </head>
 <body>
-    <h3>Prueba de Mapa</h3>
-    <div id="map"></div>
-    <script>
-        function initMap() {
-            const pos = { lat: -27.3622, lng: -55.9009 }; // Posadas, Misiones
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 14,
-                center: pos
-            });
-            new google.maps.Marker({ position: pos, map });
+  <h2>Detectar Ubicación del Usuario</h2>
+  <div id="map"></div>
+  <div id="info">Buscando ubicación...</div>
+
+  <script>
+    function initMap(lat, lng) {
+      const position = { lat, lng };
+
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 16,
+        center: position
+      });
+
+      new google.maps.Marker({
+        position,
+        map,
+        title: "Tu ubicación"
+      });
+
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: position }, (results, status) => {
+        const info = document.getElementById("info");
+        if (status === "OK" && results[0]) {
+          info.innerHTML = `
+            <strong>Dirección detectada:</strong> ${results[0].formatted_address}<br>
+            <strong>Latitud:</strong> ${lat}<br>
+            <strong>Longitud:</strong> ${lng}
+          `;
+        } else {
+          info.textContent = "No se pudo obtener la dirección.";
         }
-        window.onload = initMap;
-    </script>
+      });
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          initMap(lat, lng);
+        },
+        (error) => {
+          document.getElementById("info").textContent = "Error al obtener ubicación del usuario.";
+          console.error(error);
+        }
+      );
+    } else {
+      document.getElementById("info").textContent = "Geolocalización no soportada por tu navegador.";
+    }
+  </script>
 </body>
 </html>
