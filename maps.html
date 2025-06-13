@@ -4,33 +4,41 @@
   <meta charset="UTF-8">
   <title>Localizador de Dirección</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Estilos básicos -->
   <style>
+    body {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
     #map {
       height: 400px;
       width: 100%;
       margin-bottom: 1rem;
     }
     #info {
-      font-family: Arial, sans-serif;
       font-size: 16px;
       color: #333;
       margin-bottom: 1rem;
     }
-    body {
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-    button {
+    #confirmBtn {
       padding: 10px 15px;
       font-size: 16px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
+    #confirmBtn:hover {
+      background-color: #0b5ed7;
+    }
   </style>
-  <!-- Google Maps JavaScript API -->
+  <!-- Google Maps API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&libraries=places"></script>
 </head>
 <body>
-  <h2>Detectar tu dirección actual</h2>
+
+  <h2>Detectar dirección actual</h2>
   <div id="map"></div>
   <div id="info">Buscando ubicación...</div>
   <button id="confirmBtn">Usar esta dirección</button>
@@ -68,7 +76,6 @@
       });
     }
 
-    // Detectar ubicación del usuario
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -77,7 +84,7 @@
           initMap(lat, lng);
         },
         (error) => {
-          document.getElementById("info").textContent = "Error al obtener la ubicación del usuario.";
+          document.getElementById("info").textContent = "Error al obtener la ubicación.";
           console.error(error);
         }
       );
@@ -85,11 +92,11 @@
       document.getElementById("info").textContent = "Geolocalización no soportada por este navegador.";
     }
 
-    // Guardar dirección y volver al formulario
+    // Guardar dirección y redirigir
     document.getElementById("confirmBtn").addEventListener("click", () => {
       if (direccionDetectada) {
         localStorage.setItem("direccionDetectada", direccionDetectada);
-        window.location.href = "index.html";
+        window.location.href = "index.html"; // asegurate que esté en la misma ruta
       } else {
         alert("Aún no se ha detectado una dirección válida.");
       }
