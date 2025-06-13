@@ -1,0 +1,116 @@
+/* General */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* Fondo claro de Bootstrap */
+    color: #343a40;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor principal */
+.container {
+    max-width: 1200px;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin: auto;
+}
+
+/* Títulos */
+h1 {
+    color: #212529;
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Tablas */
+.table-hover tbody tr:hover {
+    background-color: #f1f3f5; /* Color de fondo al pasar el mouse */
+}
+
+.table th, .table td {
+    vertical-align: middle; /* Centrar texto verticalmente */
+    text-align: center;
+    padding: 10px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Formularios */
+input, select, button {
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+input:focus, select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control, .form-select {
+    font-size: 16px;
+}
+
+/* Botones personalizados */
+.btn {
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+/* Links */
+a.link {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+a.link:hover {
+    text-decoration: underline;
+}
+
+/* Filtros */
+#search {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+
+    .form-control, .form-select {
+        font-size: 14px;
+    }
+
+    .btn {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+}

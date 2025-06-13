@@ -1,5 +1,3 @@
-// view.js actualizado
-
 const apiGetUrl = "https://prod-21.brazilsouth.logic.azure.com/workflows/a1f66a512b30401f837963fb67c270fb/triggers/manual/paths/invoke/obtener_registros?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wv5unUjOMZBO6-uen9yvRsJi-ao7WAkE_pB35q_0D7k";
 const apiDeleteUrl = "https://prod-16.brazilsouth.logic.azure.com/workflows/afdbdf82d461481c8e6c1381ba764ba3/triggers/manual/paths/invoke/eliminar_cliente?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jn1ys-p_-efu_bwm0D-AJIBS2gOkiGqKTVWUW45pesQ";
 const apiUpdateUrl = "https://prod-05.brazilsouth.logic.azure.com/workflows/1b22dc96da714da1a10b6ed483c76a90/triggers/manual/paths/invoke/actualizar_cliente?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dikB4VCLsvBfEUyXgJ7Q1wyF0O1Onpwa9GsJdH8YzdU";
@@ -13,14 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const clients = await response.json();
 
             if (clients.length === 0) {
-                clientTableBody.innerHTML = '<tr><td colspan="8">No hay clientes registrados en el sistema.</td></tr>';
+                clientTableBody.innerHTML = '<tr><td colspan="7">No hay clientes registrados en el sistema.</td></tr>';
                 return;
             }
 
             clients.forEach(client => {
-                let formattedPhone = client.Telefono.replace(/\D/g, '');
+                // Formatear número para WhatsApp (Argentina +54)
+                let formattedPhone = client.Telefono.replace(/\D/g, ''); // Elimina caracteres no numéricos
                 if (!formattedPhone.startsWith("54")) {
-                    formattedPhone = "54" + formattedPhone;
+                    formattedPhone = "54" + formattedPhone; // Agrega el prefijo si no lo tiene
                 }
                 const whatsappLink = `https://wa.me/${formattedPhone}`;
 
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${client.Numero_Cliente}</td>
                     <td>${client.Nombre}</td>
                     <td>${client.Apellido}</td>
-                    <td>${client.Vendedor || ''}</td>
                     <td>${client.Direccion}</td>
                     <td>
                         <a href="${whatsappLink}" target="_blank" class="btn btn-success btn-sm">
@@ -49,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (error) {
         console.error('Error:', error.message);
-        clientTableBody.innerHTML = '<tr><td colspan="8">Error al cargar los clientes.</td></tr>';
+        clientTableBody.innerHTML = '<tr><td colspan="7">Error al cargar los clientes.</td></tr>';
     }
 });
 
@@ -61,13 +59,23 @@ function filterTable() {
     for (let row of rows) {
         let text = '';
         const cells = row.getElementsByTagName('td');
-        if (cells.length <= 1) continue;
+        
+        // Omitir si es una fila de error o mensaje de "no hay clientes"
+        if (cells.length <= 1) {
+            continue;
+        }
 
+        // Concatenar todo el contenido de las celdas
         for (let cell of cells) {
             text += cell.textContent.toLowerCase() + ' ';
         }
 
-        row.style.display = text.includes(searchInput) ? '' : 'none';
+        // Mostrar/ocultar fila según el texto de búsqueda
+        if (text.includes(searchInput)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
     }
 }
 
@@ -83,7 +91,7 @@ async function deleteClient(clientNumber) {
         });
         if (response.ok) {
             alert('Cliente eliminado con éxito.');
-            location.reload();
+            location.reload(); // Recargar la página para actualizar la lista
         } else {
             throw new Error('Error al eliminar el cliente.');
         }
@@ -104,14 +112,15 @@ async function editClient(clientNumber) {
             return;
         }
 
+        // Llenar el modal con los datos del cliente
         document.getElementById('editClientNumber').value = client.Numero_Cliente;
         document.getElementById('editName').value = client.Nombre;
         document.getElementById('editSurname').value = client.Apellido;
-        document.getElementById('editSeller').value = client.Vendedor || '';
         document.getElementById('editAddress').value = client.Direccion;
         document.getElementById('editPhone').value = client.Telefono;
         document.getElementById('editMunicipality').value = client.Municipio;
 
+        // Forzar inicialización del modal para evitar errores
         const modalElement = document.getElementById('editClientModal');
         const editModal = new bootstrap.Modal(modalElement);
         editModal.show();
@@ -121,20 +130,25 @@ async function editClient(clientNumber) {
     }
 }
 
+function updateClient(clientNumber) {
+    document.getElementById('editClientForm').submit();
+}
+
 document.getElementById('editClientForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Evitar que la página se recargue
 
     const clientData = {
         Numero_Cliente: document.getElementById('editClientNumber').value,
         Nombre: document.getElementById('editName').value,
         Apellido: document.getElementById('editSurname').value,
-        Vendedor: document.getElementById('editSeller').value,
         Direccion: document.getElementById('editAddress').value,
         Telefono: document.getElementById('editPhone').value,
         Municipio: document.getElementById('editMunicipality').value,
     };
 
     try {
+        console.log("Enviando datos a:", apiUpdateUrl); // 📌 Verifica si la URL es correcta
+
         const response = await fetch(apiUpdateUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -143,9 +157,13 @@ document.getElementById('editClientForm').addEventListener('submit', async (e) =
 
         if (response.ok) {
             alert('Cliente actualizado con éxito.');
+
+            // **Cerrar el modal correctamente**
             const modalElement = document.getElementById('editClientModal');
             const editModal = bootstrap.Modal.getInstance(modalElement);
             editModal.hide();
+
+            // **Recargar la tabla sin refrescar la página**
             await loadClients();
         } else {
             throw new Error(`Error en la API: ${response.statusText}`);
@@ -158,7 +176,7 @@ document.getElementById('editClientForm').addEventListener('submit', async (e) =
 
 async function loadClients() {
     const clientTableBody = document.querySelector('#clientTable tbody');
-    clientTableBody.innerHTML = '';
+    clientTableBody.innerHTML = ''; // Limpiar tabla antes de recargar datos
 
     try {
         const response = await fetch(apiGetUrl);
@@ -166,14 +184,15 @@ async function loadClients() {
             const clients = await response.json();
 
             if (clients.length === 0) {
-                clientTableBody.innerHTML = '<tr><td colspan="8">No hay clientes registrados en el sistema.</td></tr>';
+                clientTableBody.innerHTML = '<tr><td colspan="7">No hay clientes registrados en el sistema.</td></tr>';
                 return;
             }
 
             clients.forEach(client => {
-                let formattedPhone = client.Telefono.replace(/\D/g, '');
+                // Formatear número para WhatsApp (Argentina +54)
+                let formattedPhone = client.Telefono.replace(/\D/g, ''); // Elimina caracteres no numéricos
                 if (!formattedPhone.startsWith("54")) {
-                    formattedPhone = "54" + formattedPhone;
+                    formattedPhone = "54" + formattedPhone; // Agrega el prefijo si no lo tiene
                 }
                 const whatsappLink = `https://wa.me/${formattedPhone}`;
 
@@ -182,7 +201,6 @@ async function loadClients() {
                     <td>${client.Numero_Cliente}</td>
                     <td>${client.Nombre}</td>
                     <td>${client.Apellido}</td>
-                    <td>${client.Vendedor || ''}</td>
                     <td>${client.Direccion}</td>
                     <td>
                         <a href="${whatsappLink}" target="_blank" class="btn btn-success btn-sm">
@@ -202,6 +220,6 @@ async function loadClients() {
         }
     } catch (error) {
         console.error('Error:', error.message);
-        clientTableBody.innerHTML = '<tr><td colspan="8">Error al cargar los clientes.</td></tr>';
+        clientTableBody.innerHTML = '<tr><td colspan="7">Error al cargar los clientes.</td></tr>';
     }
 }

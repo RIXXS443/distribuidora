@@ -3,13 +3,9 @@ const apiGetUrl = "https://prod-21.brazilsouth.logic.azure.com/workflows/a1f66a5
 const apiDeleteUrl = "https://prod-16.brazilsouth.logic.azure.com/workflows/afdbdf82d461481c8e6c1381ba764ba3/triggers/manual/paths/invoke/eliminar_cliente?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=jn1ys-p_-efu_bwm0D-AJIBS2gOkiGqKTVWUW45pesQ";
 const apiUpdateUrl = "https://prod-05.brazilsouth.logic.azure.com/workflows/1b22dc96da714da1a10b6ed483c76a90/triggers/manual/paths/invoke/actualizar_cliente?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dikB4VCLsvBfEUyXgJ7Q1wyF0O1Onpwa9GsJdH8YzdU";
 
-const clientForm = document.getElementById('clientForm');
-const validationMessage = document.getElementById('validationMessage');
-const submitButton = document.getElementById('submitButton');
 
-// Cargar municipios
-document.addEventListener('DOMContentLoaded', () => {
-    const municipalities = [
+// Array de municipios
+const municipalities = [
     { MUNICIPIOS: "25 de Mayo", Departamento: "25 de Mayo" },
     { MUNICIPIOS: "9 de Julio", Departamento: "Eldorado" },
     { MUNICIPIOS: "Alba Posse", Departamento: "25 de Mayo" },
@@ -85,7 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
     { MUNICIPIOS: "Santiago de Liniers", Departamento: "Eldorado" },
     { MUNICIPIOS: "Santo Pipó", Departamento: "San Ignacio" },
     { MUNICIPIOS: "Tres Capones", Departamento: "Apóstoles" },
-]; // Colocá acá tu array completo de municipios
+];
+
+// Definir variables
+const clientForm = document.getElementById('clientForm');
+const validationMessage = document.getElementById('validationMessage');
+
+// Llenar el campo de municipios
+document.addEventListener('DOMContentLoaded', () => {
     const municipalitySelect = document.getElementById('municipality');
     municipalities.forEach(muni => {
         const option = document.createElement('option');
@@ -94,17 +97,16 @@ document.addEventListener('DOMContentLoaded', () => {
         municipalitySelect.appendChild(option);
     });
 
+    // Validar el número de cliente
     const clientNumberInput = document.getElementById('clientNumber');
     clientNumberInput.addEventListener('input', validateClientNumber);
-
-    // Evaluar validez total del formulario dinámicamente
-    const inputs = clientForm.querySelectorAll('input, select');
-    inputs.forEach(input => input.addEventListener('input', evaluarFormulario));
 });
 
-// Valida si el número de cliente ya existe
+// Validar si el número de cliente ya existe
 async function validateClientNumber() {
     const clientNumber = document.getElementById('clientNumber').value;
+    const validationMessage = document.getElementById('validationMessage');
+    const submitButton = document.getElementById('submitButton');
 
     if (!clientNumber) {
         validationMessage.style.color = 'red';
@@ -117,31 +119,25 @@ async function validateClientNumber() {
         const response = await fetch(apiGetUrl);
         const clients = await response.json();
 
-        const exists = clients.find(c => c.Numero_Cliente === clientNumber);
-        if (exists) {
+        const existingClient = clients.find(client => client.Numero_Cliente === clientNumber);
+
+        if (existingClient) {
             validationMessage.style.color = 'red';
-            validationMessage.textContent = `El número de cliente ${clientNumber} ya está registrado por: ${exists.Nombre} ${exists.Apellido}`;
+            validationMessage.textContent = `El número de cliente ${clientNumber} ya está registrado por: ${existingClient.Nombre} ${existingClient.Apellido}`;
             submitButton.disabled = true;
         } else {
             validationMessage.style.color = 'green';
             validationMessage.textContent = `El número de cliente ${clientNumber} está disponible.`;
-            evaluarFormulario(); // solo habilita si el resto también está ok
+            submitButton.disabled = false;
         }
     } catch (error) {
         console.error('Error al validar el cliente:', error.message);
-        validationMessage.textContent = 'Error de validación.';
+        validationMessage.textContent = 'Hubo un error al validar el cliente. Intente nuevamente.';
         submitButton.disabled = true;
     }
 }
 
-// Evalúa si el formulario completo es válido
-function evaluarFormulario() {
-    const formValido = clientForm.checkValidity();
-    const clientNumberOk = validationMessage.textContent.includes("disponible");
-    submitButton.disabled = !(formValido && clientNumberOk);
-}
-
-// Envío del formulario
+// Manejar el evento de envío del formulario
 clientForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -149,20 +145,19 @@ clientForm.addEventListener('submit', async (e) => {
         Numero_Cliente: document.getElementById('clientNumber').value,
         Nombre: document.getElementById('name').value,
         Apellido: document.getElementById('surname').value,
-        Vendedor: document.getElementById('seller').value,
-        Direccion: document.getElementById('address').value,
         Telefono: document.getElementById('phone').value,
-        Municipio: document.getElementById('municipality').value
+        Municipio: document.getElementById('municipality').value,
+        Direccion: document.getElementById('address').value,
     };
 
     try {
-        const res = await fetch(apiCreateUrl, {
+        const response = await fetch(apiCreateUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(clientData)
+            body: JSON.stringify(clientData),
         });
 
-        if (res.ok) {
+        if (response.ok) {
             alert('Cliente registrado con éxito.');
             clientForm.reset();
             validationMessage.textContent = '';
@@ -176,56 +171,59 @@ clientForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Eliminar cliente
 async function deleteClient(clientNumber) {
     try {
-        const res = await fetch(apiDeleteUrl, {
+        const response = await fetch(apiDeleteUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ Numero_Cliente: clientNumber })
         });
-
-        if (res.ok) {
+        if (response.ok) {
             alert('Cliente eliminado con éxito.');
             location.reload();
         } else {
-            throw new Error('Error al eliminar.');
+            throw new Error('Error al eliminar el cliente.');
         }
     } catch (error) {
-        alert('No se pudo eliminar.');
+        console.error('Error:', error.message);
+        alert('No se pudo eliminar el cliente.');
     }
 }
 
-// Actualizar cliente
-document.getElementById('editClientForm')?.addEventListener('submit', async (e) => {
+document.getElementById('editClientForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const data = {
+    const clientData = {
         Numero_Cliente: document.getElementById('editClientNumber').value,
         Nombre: document.getElementById('editName').value,
         Apellido: document.getElementById('editSurname').value,
         Direccion: document.getElementById('editAddress').value,
         Telefono: document.getElementById('editPhone').value,
-        Municipio: document.getElementById('editMunicipality').value
-        // Podés agregar Vendedor si es editable también
+        Municipio: document.getElementById('editMunicipality').value,
     };
 
     try {
-        const res = await fetch(apiUpdateUrl, {
+        const response = await fetch(apiUpdateUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(clientData),
         });
 
-        if (res.ok) {
-            alert('Cliente actualizado.');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editClientModal'));
-            modal.hide();
+        if (response.ok) {
+            alert('Cliente actualizado con éxito.');
+
+            // Cerrar el modal
+            const editModal = bootstrap.Modal.getInstance(document.getElementById('editClientModal'));
+            editModal.hide();
+
+            // Recargar la tabla sin refrescar la página
             await loadClients();
         } else {
-            throw new Error('Error al actualizar.');
+            throw new Error('Error al actualizar el cliente.');
         }
     } catch (error) {
-        alert('No se pudo actualizar.');
+        console.error('Error:', error.message);
+        alert('No se pudo actualizar el cliente.');
     }
 });
+
