@@ -141,14 +141,16 @@ async function validateClientNumber() {
 clientForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const clientData = {
-        Numero_Cliente: document.getElementById('clientNumber').value,
-        Nombre: document.getElementById('name').value,
-        Apellido: document.getElementById('surname').value,
-        Telefono: document.getElementById('phone').value,
-        Municipio: document.getElementById('municipality').value,
-        Direccion: document.getElementById('address').value,
-    };
+const clientData = {
+    Numero_Cliente: document.getElementById('clientNumber').value,
+    Nombre: document.getElementById('name').value,
+    Apellido: document.getElementById('surname').value,
+    Vendedor: document.getElementById('seller').value, // ✅ este es el campo agregado
+    Direccion: document.getElementById('address').value,
+    Telefono: document.getElementById('phone').value,
+    Municipio: document.getElementById('municipality').value,
+};
+
 
     try {
         const response = await fetch(apiCreateUrl, {
