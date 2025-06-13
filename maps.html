@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ubicación del Usuario</title>
+  <title>Localizador de Dirección</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     #map {
       height: 400px;
@@ -13,25 +14,36 @@
       font-family: Arial, sans-serif;
       font-size: 16px;
       color: #333;
+      margin-bottom: 1rem;
     }
     body {
       padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
     }
   </style>
+  <!-- Google Maps JavaScript API -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&libraries=places"></script>
 </head>
 <body>
-  <h2>Detectar Ubicación del Usuario</h2>
+  <h2>Detectar tu dirección actual</h2>
   <div id="map"></div>
   <div id="info">Buscando ubicación...</div>
+  <button id="confirmBtn">Usar esta dirección</button>
 
   <script>
+    let direccionDetectada = "";
+
     function initMap(lat, lng) {
       const position = { lat, lng };
 
       const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 16,
-        center: position
+        center: position,
+        zoom: 16
       });
 
       new google.maps.Marker({
@@ -44,8 +56,9 @@
       geocoder.geocode({ location: position }, (results, status) => {
         const info = document.getElementById("info");
         if (status === "OK" && results[0]) {
+          direccionDetectada = results[0].formatted_address;
           info.innerHTML = `
-            <strong>Dirección detectada:</strong> ${results[0].formatted_address}<br>
+            <strong>Dirección detectada:</strong> ${direccionDetectada}<br>
             <strong>Latitud:</strong> ${lat}<br>
             <strong>Longitud:</strong> ${lng}
           `;
@@ -55,6 +68,7 @@
       });
     }
 
+    // Detectar ubicación del usuario
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -63,13 +77,23 @@
           initMap(lat, lng);
         },
         (error) => {
-          document.getElementById("info").textContent = "Error al obtener ubicación del usuario.";
+          document.getElementById("info").textContent = "Error al obtener la ubicación del usuario.";
           console.error(error);
         }
       );
     } else {
-      document.getElementById("info").textContent = "Geolocalización no soportada por tu navegador.";
+      document.getElementById("info").textContent = "Geolocalización no soportada por este navegador.";
     }
+
+    // Guardar dirección y volver al formulario
+    document.getElementById("confirmBtn").addEventListener("click", () => {
+      if (direccionDetectada) {
+        localStorage.setItem("direccionDetectada", direccionDetectada);
+        window.location.href = "index.html";
+      } else {
+        alert("Aún no se ha detectado una dirección válida.");
+      }
+    });
   </script>
 </body>
 </html>
