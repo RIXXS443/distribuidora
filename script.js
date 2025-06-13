@@ -148,6 +148,7 @@ clientForm.addEventListener('submit', async (e) => {
         Telefono: document.getElementById('phone').value,
         Municipio: document.getElementById('municipality').value,
         Direccion: document.getElementById('address').value,
+        Vendedor: document.getElementById('seller').value,
     };
 
     try {
