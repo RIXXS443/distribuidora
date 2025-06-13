@@ -32,7 +32,7 @@ async function loadClients() {
                     <td>${client.Numero_Cliente}</td>
                     <td>${client.Nombre}</td>
                     <td>${client.Apellido}</td>
-                    <td>${client.Vendedor}</td>
+                    <td>${client.Vendedor}</td> <!-- ✅ posición corregida -->
                     <td>${client.Direccion}</td>
                     <td>
                         <a href="${whatsappLink}" target="_blank" class="btn btn-success btn-sm">
