@@ -24,7 +24,7 @@
     function initMap() {
       geocoder = new google.maps.Geocoder();
       map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: -27.3622, lng: -55.9000 },
+        center: { lat: -27.3622, lng: -55.9000 }, // Posadas
         zoom: 14,
       });
 
@@ -40,30 +40,34 @@
             geocodeLatLng(pos);
           },
           () => {
-            document.getElementById("direccionTexto").textContent = "No se pudo obtener la ubicación.";
+            document.getElementById("direccionTexto").textContent = "⚠️ No se pudo obtener la ubicación.";
           }
         );
       }
     }
 
     function geocodeLatLng(latlng) {
+      const direccionEl = document.getElementById("direccionTexto");
       geocoder.geocode({ location: latlng }, (results, status) => {
-        const direccionEl = document.getElementById("direccionTexto");
+        console.log("Geocoder status:", status);
+        console.log("Geocoder results:", results);
+
         if (status === "OK") {
-          if (results[0]) {
+          if (results && results.length > 0) {
             const direccion = results[0].formatted_address;
             localStorage.setItem("direccionDetectada", direccion);
-            direccionEl.textContent = "Dirección detectada: " + direccion;
+            direccionEl.textContent = "📍 Dirección detectada: " + direccion;
           } else {
-            direccionEl.textContent = "No se encontró dirección.";
+            direccionEl.textContent = "❌ No se encontró una dirección para esa ubicación.";
           }
         } else {
-          direccionEl.textContent = "Error: " + status;
+          direccionEl.textContent = "❌ Error de geocodificación: " + status;
         }
       });
     }
 
     document.getElementById("guardarDireccion").addEventListener("click", () => {
+      alert("Dirección guardada y retornando...");
       window.location.href = "index.html";
     });
   </script>
