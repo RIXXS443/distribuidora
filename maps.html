@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Localizar Dirección</title>
   <style>
-    #map { height: 80vh; width: 100%; }
+    #map { height: 70vh; width: 100%; }
     #guardarDireccion { margin-top: 10px; }
+    #direccionTexto { text-align: center; margin-top: 15px; font-weight: bold; }
   </style>
 </head>
 <body>
   <h3 style="text-align:center">Localizar Dirección</h3>
   <div id="map"></div>
+  <p id="direccionTexto">Buscando dirección...</p>
   <div class="text-center">
     <button id="guardarDireccion">Guardar Dirección</button>
   </div>
+
   <script>
     let map, geocoder, marker;
 
@@ -36,21 +39,26 @@
             marker = new google.maps.Marker({ position: pos, map: map });
             geocodeLatLng(pos);
           },
-          () => alert("No se pudo obtener la ubicación.")
+          () => {
+            document.getElementById("direccionTexto").textContent = "No se pudo obtener la ubicación.";
+          }
         );
       }
     }
 
     function geocodeLatLng(latlng) {
       geocoder.geocode({ location: latlng }, (results, status) => {
+        const direccionEl = document.getElementById("direccionTexto");
         if (status === "OK") {
           if (results[0]) {
-            localStorage.setItem("direccionDetectada", results[0].formatted_address);
+            const direccion = results[0].formatted_address;
+            localStorage.setItem("direccionDetectada", direccion);
+            direccionEl.textContent = "Dirección detectada: " + direccion;
           } else {
-            alert("No se encontró dirección.");
+            direccionEl.textContent = "No se encontró dirección.";
           }
         } else {
-          alert("Error de geocodificación: " + status);
+          direccionEl.textContent = "Error: " + status;
         }
       });
     }
@@ -59,6 +67,7 @@
       window.location.href = "index.html";
     });
   </script>
+
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&callback=initMap" async defer></script>
 </body>
 </html>
