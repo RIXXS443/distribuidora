@@ -1,68 +1,23 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Ubicación del Usuario</title>
-    <style>
-        #map {
-            height: 400px;
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-    </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&libraries=places"></script>
+    <title>Mapa Básico</title>
+    <style>#map { height: 400px; width: 100%; }</style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8"></script>
 </head>
 <body>
-    <h2>Ubicación Actual del Usuario</h2>
+    <h3>Prueba de Mapa</h3>
     <div id="map"></div>
-    <div id="output"><strong>Cargando ubicación...</strong></div>
-
     <script>
-        function initMap(lat, lng) {
-            const position = { lat, lng };
+        function initMap() {
+            const pos = { lat: -27.3622, lng: -55.9009 }; // Posadas, Misiones
             const map = new google.maps.Map(document.getElementById("map"), {
-                center: position,
-                zoom: 15
+                zoom: 14,
+                center: pos
             });
-
-            const marker = new google.maps.Marker({
-                position,
-                map,
-                title: "Estás aquí"
-            });
-
-            const geocoder = new google.maps.Geocoder();
-            geocoder.geocode({ location: position }, (results, status) => {
-                const output = document.getElementById("output");
-                if (status === "OK" && results[0]) {
-                    output.innerHTML = `<strong>Dirección:</strong> ${results[0].formatted_address}<br>
-                    <strong>Latitud:</strong> ${lat}<br>
-                    <strong>Longitud:</strong> ${lng}`;
-                } else {
-                    output.textContent = "No se pudo obtener la dirección.";
-                }
-            });
+            new google.maps.Marker({ position: pos, map });
         }
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    initMap(lat, lng);
-                },
-                (error) => {
-                    document.getElementById("output").textContent = "Error al obtener la ubicación.";
-                    console.error(error);
-                }
-            );
-        } else {
-            document.getElementById("output").textContent = "Geolocalización no está soportada en este navegador.";
-        }
+        window.onload = initMap;
     </script>
 </body>
 </html>
