@@ -32,6 +32,7 @@ async function loadClients() {
                     <td>${client.Numero_Cliente}</td>
                     <td>${client.Nombre}</td>
                     <td>${client.Apellido}</td>
+                    <td>${client.Vendedor}</td>
                     <td>${client.Direccion}</td>
                     <td>
                         <a href="${whatsappLink}" target="_blank" class="btn btn-success btn-sm">
@@ -39,7 +40,6 @@ async function loadClients() {
                         </a>
                     </td>
                     <td>${client.Municipio.trim()}</td>
-                    <td>${client.Vendedor || ''}</td>
                     <td>
                         <button class="btn btn-danger btn-sm" onclick="deleteClient('${client.Numero_Cliente}')">Eliminar</button>
                         <button class="btn btn-warning btn-sm" onclick="editClient('${client.Numero_Cliente}')">Editar</button>
@@ -110,10 +110,10 @@ async function editClient(clientNumber) {
         document.getElementById('editClientNumber').value = client.Numero_Cliente;
         document.getElementById('editName').value = client.Nombre;
         document.getElementById('editSurname').value = client.Apellido;
+        document.getElementById('editSeller').value = client.Vendedor || '';
         document.getElementById('editAddress').value = client.Direccion;
         document.getElementById('editPhone').value = client.Telefono;
         document.getElementById('editMunicipality').value = client.Municipio;
-        document.getElementById('editSeller').value = client.Vendedor || '';
 
         const modalElement = document.getElementById('editClientModal');
         const editModal = new bootstrap.Modal(modalElement);
@@ -131,10 +131,10 @@ document.getElementById('editClientForm').addEventListener('submit', async (e) =
         Numero_Cliente: document.getElementById('editClientNumber').value,
         Nombre: document.getElementById('editName').value,
         Apellido: document.getElementById('editSurname').value,
+        Vendedor: document.getElementById('editSeller').value,
         Direccion: document.getElementById('editAddress').value,
         Telefono: document.getElementById('editPhone').value,
-        Municipio: document.getElementById('editMunicipality').value,
-        Vendedor: document.getElementById('editSeller').value
+        Municipio: document.getElementById('editMunicipality').value
     };
 
     try {
