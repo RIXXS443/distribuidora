@@ -1,106 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Localizador de Dirección</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Estilos básicos -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Localizar Dirección</title>
   <style>
-    body {
-      padding: 20px;
-      font-family: Arial, sans-serif;
-    }
-    #map {
-      height: 400px;
-      width: 100%;
-      margin-bottom: 1rem;
-    }
-    #info {
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 1rem;
-    }
-    #confirmBtn {
-      padding: 10px 15px;
-      font-size: 16px;
-      background-color: #0d6efd;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #confirmBtn:hover {
-      background-color: #0b5ed7;
-    }
+    #map { height: 80vh; width: 100%; }
+    #guardarDireccion { margin-top: 10px; }
   </style>
-  <!-- Google Maps API -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&libraries=places"></script>
 </head>
 <body>
-
-  <h2>Detectar dirección actual</h2>
+  <h3 style="text-align:center">Localizar Dirección</h3>
   <div id="map"></div>
-  <div id="info">Buscando ubicación...</div>
-  <button id="confirmBtn">Usar esta dirección</button>
-
+  <div class="text-center">
+    <button id="guardarDireccion">Guardar Dirección</button>
+  </div>
   <script>
-    let direccionDetectada = "";
+    let map, geocoder, marker;
 
-    function initMap(lat, lng) {
-      const position = { lat, lng };
-
-      const map = new google.maps.Map(document.getElementById("map"), {
-        center: position,
-        zoom: 16
+    function initMap() {
+      geocoder = new google.maps.Geocoder();
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: -27.3622, lng: -55.9000 },
+        zoom: 14,
       });
 
-      new google.maps.Marker({
-        position,
-        map,
-        title: "Tu ubicación"
-      });
-
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ location: position }, (results, status) => {
-        const info = document.getElementById("info");
-        if (status === "OK" && results[0]) {
-          direccionDetectada = results[0].formatted_address;
-          info.innerHTML = `
-            <strong>Dirección detectada:</strong> ${direccionDetectada}<br>
-            <strong>Latitud:</strong> ${lat}<br>
-            <strong>Longitud:</strong> ${lng}
-          `;
-        } else {
-          info.textContent = "No se pudo obtener la dirección.";
-        }
-      });
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          initMap(lat, lng);
-        },
-        (error) => {
-          document.getElementById("info").textContent = "Error al obtener la ubicación.";
-          console.error(error);
-        }
-      );
-    } else {
-      document.getElementById("info").textContent = "Geolocalización no soportada por este navegador.";
-    }
-
-    // Guardar dirección y redirigir
-    document.getElementById("confirmBtn").addEventListener("click", () => {
-      if (direccionDetectada) {
-        localStorage.setItem("direccionDetectada", direccionDetectada);
-        window.location.href = "index.html"; // asegurate que esté en la misma ruta
-      } else {
-        alert("Aún no se ha detectado una dirección válida.");
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const pos = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            map.setCenter(pos);
+            marker = new google.maps.Marker({ position: pos, map: map });
+            geocodeLatLng(pos);
+          },
+          () => alert("No se pudo obtener la ubicación.")
+        );
       }
+    }
+
+    function geocodeLatLng(latlng) {
+      geocoder.geocode({ location: latlng }, (results, status) => {
+        if (status === "OK") {
+          if (results[0]) {
+            localStorage.setItem("direccionDetectada", results[0].formatted_address);
+          } else {
+            alert("No se encontró dirección.");
+          }
+        } else {
+          alert("Error de geocodificación: " + status);
+        }
+      });
+    }
+
+    document.getElementById("guardarDireccion").addEventListener("click", () => {
+      window.location.href = "index.html";
     });
   </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMtAgUuEJadipA2jKGs6hdNcWXRSojgA8&callback=initMap" async defer></script>
 </body>
 </html>
