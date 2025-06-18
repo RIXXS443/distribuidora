@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("clientNumber").addEventListener("blur", () => {
     const num = document.getElementById("clientNumber").value.trim();
     if (num) {
-      fetch("https://prod-21.brazilsouth.logic.azure.com/workflows/a1f66a512b30401f837963fb67c270fb/triggers/manual/paths/invoke/obtener_registros?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wv5unUjOMZBO6-uen9yvRsJi-ao7WAkE_pB35q_0D7k")
+      fetch("https://prod-21.brazilsouth.logic.azure.com/workflows/77da8e4a1ca74d87bf2ddea91a375874/triggers/manual/paths/invoke/obtener_registros?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iw7pt60GqUMZjXpkAv9bCxeYb3ao1S0ILD6maqo5FBE")
         .then((res) => res.json())
         .then((data) => {
           const yaExiste = data.find((cliente) => cliente.Numero_Cliente == num);
